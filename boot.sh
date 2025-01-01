@@ -12,6 +12,17 @@ function shutdown() {
 
 trap shutdown SIGINT SIGTERM
 
+# initialize users
+SMBPASSWD_FILE=$(grep -E "^[[:space:]]*passdb backend[[:space:]]*=" /etc/samba/smb.conf | awk -F'=' '{print $2}' | awk -F':' '{print $2}' | tr -d '[:space:]')
+if [ -f "$SMBPASSWD_FILE" ]; then
+    # Read users from smbpasswd file and create system users
+    while IFS=':' read -r username _; do
+        if [ ! -z "$username" ] && [[ ! "$username" =~ ^[#].*$ ]]; then
+            /usr/sbin/adduser --no-create-home --disabled-password --disabled-login --gecos "" "$username" || true
+        fi
+    done < "$SMBPASSWD_FILE"
+fi
+
 smbd
 exportfs -a
 
