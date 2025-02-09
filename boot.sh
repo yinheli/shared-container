@@ -24,6 +24,11 @@ if [ -f "$SMBPASSWD_FILE" ]; then
 fi
 
 smbd
+
+rpcbind
+rpc.statd
+rpc.mountd
+rpc.nfsd
 exportfs -a
 
 sleep infinity
